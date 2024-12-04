@@ -12,6 +12,9 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        merriweather: ['Merriweather', 'serif'],  // Adding Merriweather as a custom font
+      },
     },
   },
   plugins: [],
