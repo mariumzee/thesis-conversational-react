@@ -1,105 +1,113 @@
-"use client";
+"use client"; // This is a client component 👈🏽
+
 import React, { useState } from "react";
 import LinkPanel from "./components/LinkPanel";
 import ConversationPanel from "./components/ConversationPanel";
 import OpenAI from "openai";
+import MicNoneIcon from "@mui/icons-material/MicNone";
+
 
 const Home: React.FC = () => {
-  const [linkeReplies, setLinkReplies] = useState<{ role: string; content: string }[]>([]);
-  // const [conversationReplies, setConversationReplies] = useState<{ role: string; content: string }[]>([]);
-  const [conversationReplies, setConversationReplies] = useState<{ role: string; content: string }[]>([]);
-
+  const [linkChat, setLinkChat] = useState<{ role: string; content: string }[]>([]);
+  const [conversationChat, setConversationChat] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
 
-  const requestLinks = async () => {
+  const startChat = async () => {
     if (!input) return;
+    setIsLoading(true);
+    setLinkChat(prev => [...prev, { role: "user", content: input }]);
+    setConversationChat(prev => [...prev, { role: "user", content: input }]);
 
-    const response = await generateLinkSuggestions(input);
-    const conversation = await generateConversationResponse(input);
+    try {
+      const baseResponse = await fetchBaseResponse(input);
+      const { linkSuggestions, conversationResponse } = parseResponse(baseResponse);
 
-    setLinkReplies([...linkeReplies, { role: "user", content: input }, { role: "gpt", content: response }]);
-    setConversationReplies([...conversationReplies, { role: "user", content: input }, { role: "gpt", content: conversation }]);
-
-    setInput("");
+      setLinkChat(prev => [...prev, { role: "gpt", content: linkSuggestions }]);
+      setConversationChat(prev => [...prev, { role: "gpt", content: conversationResponse }]);
+      setInput("");
+    } catch (error) {
+      console.error("Error during request:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-
-  const generateConversationResponse = async (query: string): Promise<string> => {
+  const fetchBaseResponse = async (query: string): Promise<string> => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
       if (!apiKey) throw new Error("OpenAI API key is missing");
 
       const openai = new OpenAI({
         apiKey: apiKey,
-        // organization: "Macbook Marium",
-        dangerouslyAllowBrowser: true
+        dangerouslyAllowBrowser: true,
       });
 
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: query }],
+        messages: [
+          {
+            role: "user",
+            content: `Please provide a detailed response containing both contextual conversation and a list of relevant links for the topic: "${query}".`,
+          },
+        ],
       });
 
-      const message = response.choices[0].message?.content || "No response";
-      return message;
+      return response.choices[0].message?.content || "No response";
     } catch (error) {
-      console.error("Error generating conversation response:", error);
+      console.error("Error fetching base response:", error);
       return "Sorry, an error occurred. Please try again.";
     }
   };
 
+  const parseResponse = (response: string): { linkSuggestions: string, conversationResponse: string } => {
+    const linkRegex = /https?:\/\/\S+/gi;
+    const links = response.match(linkRegex) || [];
+    const linkSuggestions = links.join("\n");
+    const conversationResponse = response.replace(linkRegex, '').trim();
 
-  const generateLinkSuggestions = async (query: string): Promise<string> => {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo", // or "gpt-4" if accessible
-        messages: [{ role: "user", content: `Provide some useful links related to ${query}` }],
-      }),
-    });
-
-    const data = await response.json();
-    if (!data.choices || data.choices.length === 0) {
-      throw new Error("No choices returned from API");
-    }
-
-    return data.choices[0].message.content;
+    return { linkSuggestions, conversationResponse };
   };
+
+
   return (
     <div className="flex flex-col h-screen">
-      {/* Top two panels (each 45vh in height) */}
       <div className="flex w-full" style={{ height: "90vh" }}>
-        {/* LinkPanel (left) */}
+        {/* Link Panel */}
         <div className="w-1/2 bg-blue-100 overflow-y-auto" style={{ height: "90vh" }}>
-          <LinkPanel messages={linkeReplies} />
+          <LinkPanel messages={linkChat} loading={isLoading} />
         </div>
 
-        {/* ConversationPanel (right) */}
+        {/* Conversation Panel */}
         <div className="w-1/2 bg-green-100 overflow-y-auto" style={{ height: "90vh" }}>
-          <ConversationPanel messages={conversationReplies} />
+          <ConversationPanel messages={conversationChat} loading={isLoading} />
         </div>
       </div>
 
-      {/* Input and button at the bottom */}
-      <div className="w-full bg-blue-100 flex justify-center items-center p-4">
+      {/* Input and Button */}
+      <div className="w-full bg-blue-100 flex justify-center items-center p-4 space-x-4">
+
+
+        {/* Input Field */}
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask for links..."
-          className="border rounded p-2 w-3/4 mr-2"
+          placeholder="Ask anything"
+          className="border rounded p-2 w-3/4 text-black"
+          disabled={isLoading} // Disable input while loading
         />
-        <button onClick={requestLinks} className="bg-blue-500 text-white px-4 py-2 rounded">
-          Let's go!
+
+        {/* Search Button */}
+        <button
+          onClick={startChat}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          disabled={isLoading}
+        >
+          {isLoading ? "Loading..." : "Search"}
         </button>
       </div>
     </div>
-
-
   );
 };
 
