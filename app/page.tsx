@@ -1,6 +1,6 @@
 "use client"; // This is a client component 👈🏽
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LinkPanel from "./components/LinkPanel";
 import ConversationPanel from "./components/ConversationPanel";
 import OpenAI from "openai";
@@ -11,7 +11,34 @@ const Home: React.FC = () => {
   const [conversationChat, setConversationChat] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
+  const SpeechRecognition =
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  // Initialize SpeechRecognition if available
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false; // Stops after recognizing speech
+  recognition.interimResults = false; // Only final result is returned
+  recognition.lang = "en-US"; // Set language
+  useEffect(() => {
+    if (!SpeechRecognition) {
+      alert("Speech Recognition is not supported in this browser.");
+    }
+  }, []);
 
+  // Start speech recognition
+  const startRecognition = () => {
+    recognition.start();
+  };
+
+  // Event listener when speech is recognized
+  recognition.onresult = (event: any) => {
+    const speechToText = event.results[0][0].transcript;
+    setInput(speechToText); // Update input field with recognized text
+  };
+
+  // Handle errors
+  recognition.onerror = (event: any) => {
+    console.error("Speech recognition error", event.error);
+  };
   const startChat = async () => {
     if (!input) return;
     setIsLoading(true);
@@ -118,6 +145,21 @@ const Home: React.FC = () => {
 
       {/* Input and Button */}
       <div className="w-full bg-[#2f2f2f] flex justify-center items-center p-4 space-x-4">
+        {/* Mic Button */}
+        <button
+          onClick={startRecognition}
+          style={{
+            padding: "10px",
+            backgroundColor: "#b787f1",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          <MicNoneIcon />
+        </button>
+
         {/* Input Field */}
         <input
           type="text"
