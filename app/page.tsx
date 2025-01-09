@@ -50,6 +50,7 @@ const Home: React.FC = () => {
 
   const fetchBaseResponse = async (query: string): Promise<string> => {
     try {
+
       const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
       if (!apiKey) throw new Error("OpenAI API key is missing");
 
