@@ -1,40 +1,51 @@
+"use client";
+
 import React from 'react';
-import { ThreeDots } from 'react-loader-spinner'; // Make sure to install this package if not already included
+import { ThreeDots } from 'react-loader-spinner';
+
+interface LinkContent {
+  title: string;
+  URL: string;
+}
+
+interface Message {
+  role: string;
+  content: string | LinkContent[];
+}
 
 interface LinkPanelProps {
-  messages: { role: string; content: string }[];
+  messages: Message[];
   loading: boolean;
 }
 
 const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
-  // Function to render content, parsing out links if it's a GPT message
-  const renderContentWithLinks = (content: string) => {
-    const linkRegex = /https?:\/\/\S+/gi;
-    const links = content.match(linkRegex);
-    const textWithoutLinks = content.replace(linkRegex, '').trim();
-
-    return (
-      <>
-        <span>{textWithoutLinks}</span>
-        {links && links.map((link, index) => (
-          <a key={index} href={link} target="_blank" rel="noopener noreferrer"
-            className="block mt-2 text-blue-500 hover:text-blue-800">
-            {link}
-          </a>
-        ))}
-      </>
-    );
+  const renderMessageContent = (content: string | LinkContent[]) => {
+    if (typeof content === 'string') {
+      return <span>{content}</span>;
+    } else {
+      return (
+        <ul>
+          {content.map((link, index) => (
+            <li key={index}>
+              <a href={link.URL} target="_blank" rel="noopener noreferrer" className="block mt-2 text-blue-500 hover:text-blue-800">
+                {link.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      );
+    }
   };
 
   return (
-    <div className="p-6 h-full overflow-y-auto" style={{ backgroundColor: "#C2D9FC", paddingTop: 0 }}>
-      <h1 style={{ position: "sticky", fontStyle: "italic", top: 0, backgroundColor: "rgb(194, 217, 252, 0.8)", paddingTop: 15 }}
-        className="text-2xl font-bold text-center text-blue-600 mb-6">
+    <div className="p-6 h-full overflow-y-auto" style={{ backgroundColor: "#000000", paddingTop: 0 }}>
+      <h1 style={{ position: "sticky", color: "#b787f2", fontFamily: "serif", top: 10, backgroundColor: "rgb(31, 31, 31, 0.8)", paddingTop: 20, paddingBottom: 20 }}
+        className="text-2xl font-serif text-center mb-6">
         Link-based Assistant
       </h1>
 
       <div className="space-y-4">
-        {messages.map((msg, index) => {
+        {messages.length > 0 && messages.map((msg, index) => {
           const isUserMessage = msg.role === "user";
           return (
             <div key={index} className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}>
@@ -43,11 +54,7 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
                   {isUserMessage ? "You" : "GPT"}:
                 </div>
                 <div className="mt-2">
-                  {msg.role === "gpt" ? (
-                    renderContentWithLinks(msg.content)
-                  ) : (
-                    <span>{msg.content}</span>
-                  )}
+                  {renderMessageContent(msg.content)}
                 </div>
               </div>
             </div>
