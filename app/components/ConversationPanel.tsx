@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ThreeDots } from 'react-loader-spinner';
 
 interface ConversationPanelProps {
@@ -7,6 +7,15 @@ interface ConversationPanelProps {
 }
 
 const ConversationPanel: React.FC<ConversationPanelProps> = ({ messages, loading }) => {
+    const endOfMessagesRef = useRef<null | HTMLDivElement>(null);
+
+    useEffect(() => {
+        // Scroll into view whenever the messages array changes
+        if (endOfMessagesRef.current) {
+            endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
+
     const renderText = (text: string) => {
         return text.split("\n").map((paragraph, index) => {
             if (paragraph.trim()) {
@@ -35,8 +44,8 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({ messages, loading
                             className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}>
                             <div
                                 className={`max-w-xl p-4 rounded-lg shadow-md
-                             ${isUserMessage ? "bg-blue-600 text-white"
-                                        : "bg-white text-gray-800"}`}>
+                             ${isUserMessage ? "bg-[#2f2f2f] text-white"
+                                        : "bg-[#141414] text-white"}`}>
                                 <div className="font-semibold">
                                     {isUserMessage ? "You" : "GPT"}:
                                 </div>
@@ -47,12 +56,13 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({ messages, loading
                         </div>
                     );
                 })}
+                <div ref={endOfMessagesRef}></div> {/* This div acts as the scroll target */}
             </div>
             {loading && (
                 <ThreeDots visible={true}
                     height="80"
                     width="80"
-                    color="#4A90E2"
+                    color="#7f39fb"
                     radius="9"
                     ariaLabel="three-dots-loading"
                     wrapperStyle={{}}

@@ -66,7 +66,7 @@ const Home: React.FC = () => {
             content: `
             Provide a detailed response containing contextual details about topic
             "${query}" first. And then, provide some related links to "${query}" with
-            title as "Title:" and URL as "URL:". Please avoid writing extra text, just provide links directly without mentioning "here 
+            title as "Title:" and URL as "URL:". Please avoid writing extra text or styling, just provide links directly without mentioning "here 
             are links" or similar guidance in your response.`,
           },
         ],

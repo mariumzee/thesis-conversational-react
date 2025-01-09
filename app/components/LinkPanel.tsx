@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ThreeDots } from 'react-loader-spinner';
 
 interface LinkContent {
@@ -19,6 +19,15 @@ interface LinkPanelProps {
 }
 
 const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
+  const endOfMessagesRef = useRef<null | HTMLDivElement>(null);   // Create a ref for the last message
+
+  useEffect(() => {
+    // Scroll into view whenever the messages array changes
+    if (endOfMessagesRef.current) {
+      endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   const renderMessageContent = (content: string | LinkContent[]) => {
     if (typeof content === 'string') {
       return <span>{content}</span>;
@@ -27,8 +36,8 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
         <ul>
           {content.map((link, index) => (
             <li key={index}>
-              <a href={link.URL} target="_blank" rel="noopener noreferrer" className="block mt-2 text-blue-500 hover:text-blue-800">
-                {link.title}
+              <a href={link.URL} target="_blank" rel="noopener noreferrer" className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer">
+                {index + 1}: {link.title}
               </a>
             </li>
           ))}
@@ -49,7 +58,7 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
           const isUserMessage = msg.role === "user";
           return (
             <div key={index} className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-xl p-4 rounded-lg shadow-md ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}>
+              <div className={`max-w-xl p-4 rounded-lg shadow-md ${isUserMessage ? "bg-[#2f2f2f] text-white" : "bg-[#000] text-white"}`}>
                 <div className="font-semibold">
                   {isUserMessage ? "You" : "GPT"}:
                 </div>
@@ -60,9 +69,10 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
             </div>
           );
         })}
+        <div ref={endOfMessagesRef}></div> {/* This div acts as the scroll target */}
       </div>
       {loading && (
-        <ThreeDots visible={true} height="80" width="80" color="#76A0CA" radius="9" ariaLabel="three-dots-loading" wrapperStyle={{}} wrapperClass="" />
+        <ThreeDots visible={true} height="80" width="80" color="#b787f2" radius="9" ariaLabel="three-dots-loading" wrapperStyle={{}} wrapperClass="" />
       )}
     </div>
   );
