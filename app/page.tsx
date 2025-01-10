@@ -1,176 +1,95 @@
-"use client"; // This is a client component 👈🏽
-
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import LinkPanel from "./components/LinkPanel";
 import ConversationPanel from "./components/ConversationPanel";
 import OpenAI from "openai";
-import MicNoneIcon from "@mui/icons-material/MicNone";
 
 const Home: React.FC = () => {
   const [linkChat, setLinkChat] = useState<{ role: string; content: any }[]>([]);
   const [conversationChat, setConversationChat] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
-  const SpeechRecognition =
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-  // Initialize SpeechRecognition if available
-  const recognition = new SpeechRecognition();
-  recognition.continuous = false; // Stops after recognizing speech
-  recognition.interimResults = false; // Only final result is returned
-  recognition.lang = "en-US"; // Set language
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
-    if (!SpeechRecognition) {
-      alert("Speech Recognition is not supported in this browser.");
-    }
+    const initialInstruction = {
+      role: "system", content: `For each and every query in our chat, 
+      you have to give a well-explained response containing contextual 
+      the topics we discuss. Your response should contain two sections i.e, section-1 and section-2. 
+      In section-1, you should only give textual answer explanation and in section-2 
+      you should give the relevant links.
+      the response in Section-2 should be written as a JSON object/Python dictionary, where the key of the dictionary is
+      the title of the url link and value of the dictionary is the http link itself.`
+    };
+    setConversationChat([initialInstruction]);
   }, []);
 
-  // Start speech recognition
-  const startRecognition = () => {
-    recognition.start();
-  };
-
-  // Event listener when speech is recognized
-  recognition.onresult = (event: any) => {
-    const speechToText = event.results[0][0].transcript;
-    setInput(speechToText); // Update input field with recognized text
-  };
-
-  // Handle errors
-  recognition.onerror = (event: any) => {
-    console.error("Speech recognition error", event.error);
-  };
   const startChat = async () => {
     if (!input) return;
     setIsLoading(true);
 
     try {
-      // Append the user's input to both chat panels
-      setLinkChat(prev => [...prev, { role: "user", content: input }]);
-      setConversationChat(prev => [...prev, { role: "user", content: input }]);
+      const updatedConversationChat = [...conversationChat, { role: "user", content: input }];
+      setConversationChat(updatedConversationChat);
 
-      // Fetch the response from OpenAI
-      const baseResponse = await fetchBaseResponse(input);
-
-      // Parse the response into link suggestions and conversation response
-      const { linkSuggestions, conversationResponse } = parseResponse(baseResponse);
-
-      // Update chat with parsed data
-      updateChats(linkSuggestions, conversationResponse);
+      const response = await fetchBaseResponse(updatedConversationChat);
+      updateChats(response);
     } catch (error) {
       console.error("Error during request:", error);
     } finally {
       setIsLoading(false);
-      setInput(""); // Clear input after processing is done
+      setInput("");
     }
   };
 
-  const updateChats = (links: any[], conversation: string) => {
+  const fetchBaseResponse = async (chatHistory: any[]): Promise<string> => {
+    const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+    if (!apiKey) throw new Error("OpenAI API key is missing");
+
+    const openai = new OpenAI({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true,
+    });
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: chatHistory,
+    });
+
+    return response.choices[0].message?.content || "No response";
+  };
+
+  const updateChats = (response: string) => {
     setLinkChat(prev => [
       ...prev,
-      { role: "gpt", content: links } // Links are passed as content
+      { role: "assistant", content: response }
     ]);
+    // Assuming the response format here includes the conversation and links embedded
+    // The LinkPanel will need to parse out the links itself.
     setConversationChat(prev => [
       ...prev,
-      { role: "gpt", content: conversation }
+      { role: "assistant", content: response }
     ]);
-  };
-
-  const fetchBaseResponse = async (query: string): Promise<string> => {
-    try {
-
-      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-      if (!apiKey) throw new Error("OpenAI API key is missing");
-
-      const openai = new OpenAI({
-        apiKey: apiKey,
-        dangerouslyAllowBrowser: true,
-      });
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: `
-            Provide a detailed response containing contextual details about topic
-            "${query}" first. And then, provide some related links to "${query}" with
-            title as "Title:" and URL as "URL:". Please avoid writing extra text or styling, just provide links directly without mentioning "here 
-            are links" or similar guidance in your response.`,
-          },
-        ],
-      });
-
-      return response.choices[0].message?.content || "No response";
-    } catch (error) {
-      console.error("Error fetching base response:", error);
-      return "Sorry, an error occurred. Please try again.";
-    }
-  };
-
-  const parseResponse = (response: string): { linkSuggestions: any[], conversationResponse: string } => {
-    // Regular expression to match titles followed by URLs
-    const linkRegex = /Title: (.+?)\nURL: (https?:\/\/\S+)/gi;
-
-    let match;
-    const links = [];
-
-    // Loop through each match to extract titles and URLs
-    while ((match = linkRegex.exec(response)) !== null) {
-      // Create an object for each link with title and URL
-      const linkObject = { title: match[1], URL: match[2] };
-      links.push(linkObject);
-    }
-
-    console.log("Links Extracted:", links);
-
-    // Remove the matched title and URL lines from the response
-    const conversationResponse = response.replace(linkRegex, '').trim();
-
-    return { linkSuggestions: links, conversationResponse };
   };
 
   return (
     <div className="flex flex-col h-screen">
       <div className="flex w-full" style={{ height: "90vh" }}>
-        {/* Link Panel */}
-        <div className="w-1/2 bg-blue-100 overflow-y-auto" style={{ height: "90vh" }}>
-          <LinkPanel messages={linkChat} loading={isLoading} />
+        <div className="w-1/2 bg-blue-100 overflow-y-auto">
+          <LinkPanel messages={conversationChat} loading={isLoading} />
         </div>
-
-        {/* Conversation Panel */}
-        <div className="w-1/2 bg-green-100 overflow-y-auto" style={{ height: "90vh" }}>
+        <div className="w-1/2 bg-green-100 overflow-y-auto">
           <ConversationPanel messages={conversationChat} loading={isLoading} />
         </div>
       </div>
-
-      {/* Input and Button */}
       <div className="w-full bg-[#2f2f2f] flex justify-center items-center p-4 space-x-4">
-        {/* Mic Button */}
-        <button
-          onClick={startRecognition}
-          style={{
-            padding: "10px",
-            backgroundColor: "#b787f1",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          <MicNoneIcon />
-        </button>
-
-        {/* Input Field */}
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask anything"
           className="border bg-[#2f2f2f] rounded p-2 w-3/4 text-white"
-          disabled={isLoading} // Disable input while loading
+          disabled={isLoading}
         />
-
-        {/* Search Button */}
         <button
           onClick={startChat}
           className="bg-[#320064] text-white px-4 py-2 rounded"

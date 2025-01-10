@@ -3,14 +3,10 @@
 import React, { useEffect, useRef } from 'react';
 import { ThreeDots } from 'react-loader-spinner';
 
-interface LinkContent {
-  title: string;
-  URL: string;
-}
 
 interface Message {
   role: string;
-  content: string | LinkContent[];
+  content: string
 }
 
 interface LinkPanelProps {
@@ -20,30 +16,46 @@ interface LinkPanelProps {
 
 const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
   const endOfMessagesRef = useRef<null | HTMLDivElement>(null);   // Create a ref for the last message
-
+  // const linkContent = messages.content
   useEffect(() => {
     // Scroll into view whenever the messages array changes
     if (endOfMessagesRef.current) {
       endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
-  const renderMessageContent = (content: string | LinkContent[]) => {
-    if (typeof content === 'string') {
-      return <span>{content}</span>;
-    } else {
-      return (
-        <ul>
-          {content.map((link, index) => (
-            <li key={index}>
-              <a href={link.URL} target="_blank" rel="noopener noreferrer" className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer">
-                {index + 1}: {link.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      );
+  function extractJsonObject(inputString: string): any {
+    // This regex assumes the JSON starts with '{' and ends with '}' and does not account for nested objects
+    const regex = /{[^{}]*}/;
+    const match = inputString.match(regex);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (e) {
+        console.error("Failed to parse JSON", e);
+      }
     }
+    return null; // or throw an error, or return undefined, depending on your needs
+  }
+  const renderMessageContent = (content: string) => {
+    // const sentence = "Section-1askmjoskmLSSection-2:aoskkd";
+    const section2 = content.split("Section-2:")[1] || "";
+    const JSONOBJ = extractJsonObject(section2)
+
+    console.log('JSONONNASKNK', JSONOBJ)
+    return (
+      <ul>
+
+        {Object && Object.entries(JSONOBJ).map(([key, value], index) => {
+
+          return (
+            <li key={key}>
+              <a href={String(value)} className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer">   {index + 1}: {String(key)}</a>
+            </li>
+          )
+        })}
+
+      </ul>
+    );
   };
 
   return (
@@ -54,7 +66,7 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
       </h1>
 
       <div className="space-y-4">
-        {messages.length > 0 && messages.map((msg, index) => {
+        {messages.filter(msg => msg.role !== 'system').map((msg, index) => {
           const isUserMessage = msg.role === "user";
           return (
             <div key={index} className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}>
@@ -62,9 +74,12 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
                 <div className="font-semibold">
                   {isUserMessage ? "You" : "GPT"}:
                 </div>
-                <div className="mt-2">
+                {!isUserMessage ? (<div className="mt-2">
                   {renderMessageContent(msg.content)}
-                </div>
+                </div>) : (<div className="mt-2">
+                  {(msg.content)}
+                </div>)}
+
               </div>
             </div>
           );

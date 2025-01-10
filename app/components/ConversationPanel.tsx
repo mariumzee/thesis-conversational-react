@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef } from 'react';
 import { ThreeDots } from 'react-loader-spinner';
 
@@ -8,17 +10,29 @@ interface ConversationPanelProps {
 
 const ConversationPanel: React.FC<ConversationPanelProps> = ({ messages, loading }) => {
     const endOfMessagesRef = useRef<null | HTMLDivElement>(null);
-
     useEffect(() => {
-        // Scroll into view whenever the messages array changes
         if (endOfMessagesRef.current) {
             endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
 
+    const cleanText = (text: string) => {
+        return text
+            .replace(/({[^{}]*})/g, '') // Attempt to remove simple JSON objects
+
+            .replace(/section-\d+/gi, '') // Remove 'section-1', 'section-2', etc. case-insensitively
+            .replace(/[\{\}\[\]•,;]+/g, '') // Remove extra brackets, bullet points, commas, curly brackets, and semicolons
+            .replace(/^\s*:\s*|\s*:\s*$/gm, '') // Remove colons at the start or end of each line
+            .replace(/\s{2,}/g, ' ') // Replace multiple spaces with a single space
+            .trim(); // Trim leading and trailing spaces
+    };
+
+
     const renderText = (text: string) => {
+        text = cleanText(text); // Clean text before splitting into paragraphs
         return text.split("\n").map((paragraph, index) => {
-            if (paragraph.trim()) {
+            paragraph = paragraph.trim(); // Trim each paragraph to ensure it's not just whitespace
+            if (paragraph) {
                 return <p key={index} style={{ marginBottom: '0.75em' }}>{paragraph}</p>;
             }
             return null;
@@ -32,12 +46,12 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({ messages, loading
                 paddingTop: 0
             }}>
             <h1 style={{ position: "sticky", color: "#7f39fb", top: 10, backgroundColor: "rgb(40, 40, 40, 0.8)", paddingTop: 20, paddingBottom: 20 }}
-                className="text-2xl font-serif  text-center mb-10">
+                className="text-2xl font-serif text-center mb-10">
                 Conversation Panel
             </h1>
 
             <div className="space-y-4">
-                {messages.map((msg, index) => {
+                {messages.filter(msg => msg.role !== 'system').map((msg, index) => {
                     const isUserMessage = msg.role === "user";
                     return (
                         <div key={index}
@@ -56,7 +70,7 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({ messages, loading
                         </div>
                     );
                 })}
-                <div ref={endOfMessagesRef}></div> {/* This div acts as the scroll target */}
+                <div ref={endOfMessagesRef}></div>
             </div>
             {loading && (
                 <ThreeDots visible={true}
