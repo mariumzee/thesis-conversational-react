@@ -3,12 +3,44 @@ import React, { useState, useEffect } from "react";
 import LinkPanel from "./components/LinkPanel";
 import ConversationPanel from "./components/ConversationPanel";
 import OpenAI from "openai";
+import MicNoneIcon from "@mui/icons-material/MicNone";
+
+const SpeechRecognition =
+  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 const Home: React.FC = () => {
   const [linkChat, setLinkChat] = useState<{ role: string; content: any }[]>([]);
   const [conversationChat, setConversationChat] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Initialize SpeechRecognition if available
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false; // Stops after recognizing speech
+  recognition.interimResults = false; // Only final result is returned
+  recognition.lang = "en-US"; // Set language
+
+  useEffect(() => {
+    if (!SpeechRecognition) {
+      alert("Speech Recognition is not supported in this browser.");
+    }
+  }, []);
+
+  // Start speech recognition
+  const startRecognition = () => {
+    recognition.start();
+  };
+
+  // Event listener when speech is recognized
+  recognition.onresult = (event: any) => {
+    const speechToText = event.results[0][0].transcript;
+    setInput(speechToText); // Update input field with recognized text
+  };
+
+  // Handle errors
+  recognition.onerror = (event: any) => {
+    console.error("Speech recognition error", event.error);
+  };
 
   useEffect(() => {
     const initialInstruction = {
@@ -82,13 +114,33 @@ const Home: React.FC = () => {
         </div>
       </div>
       <div className="w-full bg-[#2f2f2f] flex justify-center items-center p-4 space-x-4">
+        {/* Mic Button */}
+        <button
+          onClick={startRecognition}
+          style={{
+            padding: "10px",
+            backgroundColor: "#b787f2",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          <MicNoneIcon />
+        </button>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask anything"
+          placeholder={!isLoading ? "" : "Ask anything"}
           className="border bg-[#2f2f2f] rounded p-2 w-3/4 text-white"
           disabled={isLoading}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !isLoading) {
+              e.preventDefault(); // Prevent the default action of the enter key
+              startChat();
+            }
+          }}
         />
         <button
           onClick={startChat}
@@ -97,6 +149,7 @@ const Home: React.FC = () => {
         >
           {isLoading ? "Loading..." : "Search"}
         </button>
+
       </div>
     </div>
   );
