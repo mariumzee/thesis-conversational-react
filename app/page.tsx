@@ -44,12 +44,14 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const initialInstruction = {
-      role: "system", content: `For each and every query in our chat, 
-      you have to give a well-explained response containing contextual 
+      role: "system",
+      content: `For each and every message in our chat, 
+      you have to give a good response containing contextual 
       the topics we discuss. Your response should contain two sections i.e, section-1 and section-2. 
       In section-1, you should only give textual answer explanation and in section-2 
       you should give the relevant links.
-      the response in Section-2 should be written as a JSON object/Python dictionary, where the key of the dictionary is
+      the response in Section-2 should be written as a JSON object/Python dictionary, 
+      where the key of the dictionary is
       the title of the url link and value of the dictionary is the http link itself.`
     };
     setConversationChat([initialInstruction]);
@@ -95,8 +97,7 @@ const Home: React.FC = () => {
       ...prev,
       { role: "assistant", content: response }
     ]);
-    // Assuming the response format here includes the conversation and links embedded
-    // The LinkPanel will need to parse out the links itself.
+
     setConversationChat(prev => [
       ...prev,
       { role: "assistant", content: response }
@@ -119,7 +120,7 @@ const Home: React.FC = () => {
           onClick={startRecognition}
           style={{
             padding: "10px",
-            backgroundColor: "#b787f2",
+            backgroundColor: "#320064",
             color: "white",
             border: "none",
             borderRadius: "5px",
@@ -133,18 +134,20 @@ const Home: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={!isLoading ? "" : "Ask anything"}
-          className="border bg-[#2f2f2f] rounded p-2 w-3/4 text-white"
+          className={`bg-[#2f2f2f] border border-gray-700 focus:border-[#b787f2] rounded p-2 w-3/4 text-white focus:outline-none ${isLoading ? 'cursor-not-allowed' : 'cursor-text'}`}
           disabled={isLoading}
-          onKeyDown={e => {
+          onKeyDown={(e) => {
             if (e.key === 'Enter' && !isLoading) {
               e.preventDefault(); // Prevent the default action of the enter key
               startChat();
             }
           }}
         />
+
+
         <button
           onClick={startChat}
-          className="bg-[#320064] text-white px-4 py-2 rounded"
+          className={`bg-[#320064] text-white px-4 py-2 rounded ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#3a0078] cursor-pointer'}`}
           disabled={isLoading}
         >
           {isLoading ? "Loading..." : "Search"}

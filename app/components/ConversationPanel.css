@@ -1,0 +1,79 @@
+.panel-container {
+    padding: 1.5rem;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #141414;
+  }
+  
+  .panel-title {
+    z-index: 200;
+    position: sticky;
+    top: 10px;
+    background-color: rgba(31, 31, 31, 0.8);
+    color: #7f39fb;
+    font-family: serif;
+    padding-top: 20px;
+    font-size: 18px;
+    padding-bottom: 20px;
+    text-align: center;
+  }
+  
+  .message-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .message {
+    display: flex;
+    justify-content: flex-start;
+    opacity: 0;
+    animation: slideFromLeft 0.5s forwards, fadeIn 0.5s forwards;
+  }
+  
+  .user-message {
+    justify-content: flex-end;
+    margin-top: 20px;
+    animation: slideFromRight 0.5s forwards, fadeIn 0.5s forwards;
+  }
+  
+  @keyframes slideFromRight {
+    0% {
+      transform: translateX(50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideFromLeft {
+    0% {
+      transform: translateX(-50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .message-box {
+    max-width: 40rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px #000;
+    background-color: #2f2f2f;
+    color: white;
+  }
+  
+  .message-paragraph {
+    margin-bottom: 0.75em;
+  }
+  
