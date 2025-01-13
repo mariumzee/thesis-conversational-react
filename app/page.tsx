@@ -5,14 +5,14 @@ import ConversationPanel from "./components/ConversationPanel";
 import OpenAI from "openai";
 import MicNoneIcon from "@mui/icons-material/MicNone";
 
-const SpeechRecognition =
-  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 const Home: React.FC = () => {
-  const [linkChat, setLinkChat] = useState<{ role: string; content: any }[]>([]);
   const [conversationChat, setConversationChat] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Try to get the SpeechRecognition object, handling browsers that may not support it
+  const SpeechRecognition = (typeof window !== "undefined") && (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
   // Initialize SpeechRecognition if available
   const recognition = new SpeechRecognition();
@@ -93,10 +93,6 @@ const Home: React.FC = () => {
   };
 
   const updateChats = (response: string) => {
-    setLinkChat(prev => [
-      ...prev,
-      { role: "assistant", content: response }
-    ]);
 
     setConversationChat(prev => [
       ...prev,
