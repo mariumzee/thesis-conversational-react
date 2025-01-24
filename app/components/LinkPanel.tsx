@@ -44,7 +44,8 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
       <ul>
         {jsonObj && Object.entries(jsonObj).map(([key, value], index) => (
           <li key={key}>
-            <a href={String(value)} className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer">
+            <a href={String(value)} target="_blank"
+              className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer">
               {index + 1}: {String(key)}
             </a>
           </li>
