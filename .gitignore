@@ -2,6 +2,11 @@
 
 # dependencies
 /node_modules
+.firebase
+firebase.json
+.firebaserc
+firebase-hosting-merge.yml
+firebase-hosting-pull-request.yml
 /.pnp
 .pnp.*
 .yarn/*
