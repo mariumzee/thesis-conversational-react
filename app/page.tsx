@@ -85,7 +85,7 @@ const Home: React.FC = () => {
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: chatHistory,
     });
 
@@ -134,9 +134,9 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div className="w-full bg-[#2f2f2f] flex justify-center items-center p-4 space-x-4">
-          <SpeechComponent
+          {/* <SpeechComponent
             onTranscript={(transcript) => setInput(transcript)}
-          />
+          /> */}
           <input
             type="text"
             value={input}

@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef } from "react";
 import { ThreeDots } from "react-loader-spinner";
-import "./ConversationPanel.css"; // Ensure this CSS file exists
+import "./ConversationPanel.css"; // Ensure to create this CSS file for styling
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   role: string;
@@ -25,92 +27,44 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
       endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+  function removeSentenceStartingFrom(input: string, phrase: string): string {
+    const regex = new RegExp(phrase + ".*?[.!?]", "i"); // Case insensitive match
+    return input.replace(regex, "").trim();
+  }
 
   const cleanText = (text: string) => {
-    return text
-      .replace(/```json\s*[\s\S]*?```/g, "") // Remove multi-line JSON blocks
-      .replace(/\{[\s\S]*?\}/g, "") // Remove inline JSON objects
-      .replace(/https?:\/\/\S+/g, "") // Remove links
-      .replace(/^#{1,6}\s*/gm, "") // Remove markdown headers (#, ##, ###, etc.)
-      .replace(/section-\d+/gi, "") // Remove section indicators
-      .replace(/[\[\]]+/g, "") // Remove brackets
-      .replace(/^\s*:\s*|\s*:\s*$/gm, "") // Trim colons
-      .replace(/\s{2,}/g, " ") // Reduce multiple spaces
-      .trim();
-  };
+    const sectionJsonRegex = /Section-2:\s*\{[\s\S]*?\}/g; // Matches "Section-2:" followed by JSON (multi-line safe)
+    const jsonRegex = /\{[\s\S]*?\}/g; // Matches any JSON object
 
-  const renderBoldText = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g); // Split by **bold**
-    return parts.map((part, i) =>
-      part.startsWith("**") && part.endsWith("**") ? (
-        <strong key={i}>{part.slice(2, -2)}</strong>
-      ) : (
-        part
-      )
-    );
+    text = text
+      .replace(sectionJsonRegex, "") // Removes "Section-2" and its JSON
+      .replace(jsonRegex, "") // Extra safety to remove any remaining JSON
+      .replace(/section-\d+/gi, "") // R
+      .replace("Section 1", "") // Removes any "section-#" occurrences
+      .replace("Working links json", "") // Removes any "section-#" occurrences
+      .replace("Working Links JSON", "") // Removes any "section-#" occurrences
+      .replace("JSON", "") // Removes any "section-#" occurrences
+      .replace("Textual Answer Explanation", "")
+      .replace("Section 2", "") // Removes any "section-#" occurrences
+      .replace("=", "") // Removes any "section-#" occurrences
+
+      .replace(/[\{\}\[\]•,;]+/g, "") // Cleans up leftover symbols
+      .replace(/^\s*:\s*|\s*:\s*$/gm, "") // Removes isolated colons
+      .replace(/\s{2,}/g, " ") // Collapses extra spaces
+      .trim();
+
+    return removeSentenceStartingFrom(text, "Here are");
   };
 
   const renderText = (text: string) => {
+    const numberedListRegex = /\d+\.\s(.*?)(?=\s\d+\.|$)/g;
+
+    text = text.replace(numberedListRegex, "").trim();
     text = cleanText(text);
 
-    // Detect lists
-    const numberedListPattern = /^(\d+)\.\s(.+)/; // Matches "1. Text", "2. Text"
-    const bulletListPattern = /^[-•]\s(.+)/; // Matches "- Text", "• Text"
+    console.log("CLEANED TEXT= ", text);
 
-    let currentList: JSX.Element[] = [];
-    let isNumberedList = false;
-    const elements: JSX.Element[] = [];
-
-    const flushList = () => {
-      if (currentList.length > 0) {
-        if (isNumberedList) {
-          elements.push(
-            <ol key={elements.length} className="list-decimal pl-5">
-              {currentList}
-            </ol>
-          );
-        } else {
-          elements.push(
-            <ul key={elements.length} className="list-disc pl-5">
-              {currentList}
-            </ul>
-          );
-        }
-        currentList = [];
-        isNumberedList = false;
-      }
-    };
-
-    // Split text into sections while maintaining inline formatting
-    const lines = text.split(/(?=\d+\.\s|- |• )/g);
-
-    lines.forEach((line, index) => {
-      line = line.trim();
-      const numberedMatch = line.match(numberedListPattern);
-      const bulletMatch = line.match(bulletListPattern);
-
-      if (numberedMatch) {
-        if (!isNumberedList && currentList.length > 0) flushList();
-        isNumberedList = true;
-        currentList.push(
-          <li key={index}>{renderBoldText(numberedMatch[2])}</li>
-        );
-      } else if (bulletMatch) {
-        if (isNumberedList) flushList();
-        currentList.push(<li key={index}>{renderBoldText(bulletMatch[1])}</li>);
-      } else {
-        flushList();
-        elements.push(
-          <p key={index} className="message-paragraph">
-            {renderBoldText(line)}
-          </p>
-        );
-      }
-    });
-
-    flushList(); // Ensure any remaining list items are flushed
-
-    return elements;
+    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>;
   };
 
   return (

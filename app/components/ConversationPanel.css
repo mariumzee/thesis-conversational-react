@@ -80,3 +80,23 @@
 .message-paragraph {
   margin-bottom: 0.75em;
 }
+
+.numbered-list {
+  margin-top: 10px;
+  padding-left: 20px;
+  border-left: 3px solid #007bff; /* Blue border for emphasis */
+}
+
+.list-item {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+  padding-left: 5px;
+}
+
+.message-paragraph {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}

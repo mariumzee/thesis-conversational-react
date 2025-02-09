@@ -51,22 +51,26 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
     const section2 = content.split("Section-2:")[1] || "";
     const jsonObj = extractJsonObject(section2);
 
-    return (
-      <ul>
-        {jsonObj &&
-          Object.entries(jsonObj).map(([key, value], index) => (
-            <li key={key}>
-              <a
-                href={String(value)}
-                target="_blank"
-                className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer"
-              >
-                {index + 1}: {String(key)}
-              </a>
-            </li>
-          ))}
-      </ul>
-    );
+    if (jsonObj) {
+      return (
+        <ul>
+          {jsonObj &&
+            Object.entries(jsonObj).map(([key, value], index) => (
+              <li key={key}>
+                <a
+                  href={String(value)}
+                  target="_blank"
+                  className="block mt-2 text-[#b787f2] hover:text-[#CCAAF6] cursor-pointer"
+                >
+                  {index + 1}: {String(key)}
+                </a>
+              </li>
+            ))}
+        </ul>
+      );
+    } else {
+      return <span>I don't have related links to this topic.</span>;
+    }
   };
   return (
     <div className="p-6 h-full overflow-y-auto link-panel">
@@ -86,9 +90,7 @@ const LinkPanel: React.FC<LinkPanelProps> = ({ messages, loading }) => {
               >
                 <div className="message-box">
                   <div className="message-role">
-                    {isUserMessage
-                      ? "You"
-                      : "GPT suggests the following links:"}
+                    {isUserMessage ? "You" : "GPT suggests the following links"}
                     :
                   </div>
                   <div className="message-content">
