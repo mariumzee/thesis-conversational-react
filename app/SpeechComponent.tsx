@@ -67,7 +67,7 @@ const SpeechComponent: React.FC<{
     <Button
       onClick={startRecognition}
       style={{
-        padding: "10px",
+        padding: "6px",
         backgroundColor: isListening ? "#f44336" : "#320064",
         color: "white",
         border: "none",
@@ -76,7 +76,7 @@ const SpeechComponent: React.FC<{
       }}
       startIcon={<MicNoneIcon />}
     >
-      {isListening ? "Stop Listening" : "Start Listening"}
+      {isListening ? "Stop" : "Start"}
     </Button>
   );
 };
