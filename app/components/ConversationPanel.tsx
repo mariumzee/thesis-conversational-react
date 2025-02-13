@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ThreeDots } from "react-loader-spinner";
 import "./ConversationPanel.css"; // Ensure to create this CSS file for styling
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ReactGA from "react-ga4"; // Use "react-ga" if using Universal Analytics
+const TRACKING_ID_GA = "G-6RB1RCRXHR";
+
+ReactGA.initialize(TRACKING_ID_GA);
 
 interface Message {
   role: string;
@@ -21,12 +25,35 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
   loading,
 }) => {
   const endOfMessagesRef = useRef<null | HTMLDivElement>(null);
+  const [loadingMessage, setLoadingMessage] = useState("Writing response...");
+
+  // Array of dynamic loading texts
+  const loadingTexts = [
+    "Writing response...",
+    "Gathering information...",
+    "Thinking...",
+    "Almost there...",
+  ];
+
+  // Cycle through loading messages every 2 seconds
+  useEffect(() => {
+    if (loading) {
+      let index = 0;
+      const interval = setInterval(() => {
+        setLoadingMessage(loadingTexts[index]);
+        index = (index + 1) % loadingTexts.length;
+      }, 2000);
+
+      return () => clearInterval(interval);
+    }
+  }, [loading]);
 
   useEffect(() => {
     if (endOfMessagesRef.current) {
       endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
   function removeSentenceStartingFrom(input: string, phrase: string): string {
     const regex = new RegExp(phrase + ".*?[.!?]", "i"); // Case insensitive match
     return input.replace(regex, "").trim();
@@ -37,20 +64,23 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
     const jsonRegex = /\{[\s\S]*?\}/g; // Matches any JSON object
 
     text = text
-      .replace(sectionJsonRegex, "") // Removes "Section-2" and its JSON
-      .replace(jsonRegex, "") // Extra safety to remove any remaining JSON
-      .replace(/section-\d+/gi, "") // R
-      .replace("Section 1", "") // Removes any "section-#" occurrences
-      .replace("Working links json", "") // Removes any "section-#" occurrences
-      .replace("Working Links JSON", "") // Removes any "section-#" occurrences
-      .replace("JSON", "") // Removes any "section-#" occurrences
+      .replace(sectionJsonRegex, "")
+      .replace(jsonRegex, "")
+      .replace(/section-\d+/gi, "")
+      .replace("Section 1", "")
+      .replace("Working links json", "")
+      .replace("Working Links JSON", "")
+      .replace("JSON", "")
+      .replace("json", "")
       .replace("Textual Answer Explanation", "")
-      .replace("Section 2", "") // Removes any "section-#" occurrences
-      .replace("=", "") // Removes any "section-#" occurrences
-
-      .replace(/[\{\}\[\]•,;]+/g, "") // Cleans up leftover symbols
-      .replace(/^\s*:\s*|\s*:\s*$/gm, "") // Removes isolated colons
-      .replace(/\s{2,}/g, " ") // Collapses extra spaces
+      .replace("*", "")
+      .replace("**", "")
+      .replace("Textual Explanation", "")
+      .replace("Section 2", "")
+      .replace("=", "")
+      .replace(/[\{\}\[\]•,;]+/g, "")
+      .replace(/^\s*:\s*|\s*:\s*$/gm, "")
+      .replace(/\s{2,}/g, " ")
       .trim();
 
     return removeSentenceStartingFrom(text, "Here are");
@@ -58,14 +88,29 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
 
   const renderText = (text: string) => {
     const numberedListRegex = /\d+\.\s(.*?)(?=\s\d+\.|$)/g;
-
     text = text.replace(numberedListRegex, "").trim();
     text = cleanText(text);
 
-    console.log("CLEANED TEXT= ", text);
-
     return <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>;
   };
+
+  useEffect(() => {
+    const handleKeyPress = (event: { key: string }) => {
+      if (event.key === "Enter") {
+        ReactGA.event({
+          category: "Keyboard",
+          action: "Pressed Enter Key",
+          label: "User pressed Enter key",
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
 
   return (
     <div className="panel-container">
@@ -98,14 +143,17 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
       </div>
 
       {loading && (
-        <ThreeDots
-          visible={true}
-          height="50"
-          width="50"
-          color="#7f39fb"
-          radius="9"
-          ariaLabel="three-dots-loading"
-        />
+        <div className="loading-container">
+          <ThreeDots
+            visible={true}
+            height="50"
+            width="50"
+            color="#7f39fb"
+            radius="9"
+            ariaLabel="three-dots-loading"
+          />
+          <p className="loading-text">{loadingMessage}</p>
+        </div>
       )}
     </div>
   );
