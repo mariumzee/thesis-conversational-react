@@ -46,7 +46,7 @@ const Home: React.FC = () => {
       content: `For each and every message, 
       you have to give a detailed response. Your response should contain two sections i.e, section-1 and section-2. 
       In section-1, you should only give textual answer explanation and in section-2 
-      you should give more than 5 relevant working links.
+      you should give more than 5 relevant perfectly working website links.
       the response in Section-2 should be written as a JSON object/Python dictionary, 
       where the key of the dictionary is
       the title of the url link and value of the dictionary is the http link itself.`,

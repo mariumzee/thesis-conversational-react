@@ -64,16 +64,24 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
     const jsonRegex = /\{[\s\S]*?\}/g; // Matches any JSON object
 
     text = text
-      .replace(sectionJsonRegex, "")
+      .replace("**Section-1: Explanation**", "")
+      .replace("Textual Answer Explanation", "")
+      .replace("**Section-1: Explanation**", "")
+      .replace("Section 1", "")
+
+      // .replace(sectionJsonRegex, "")
       .replace(jsonRegex, "")
       .replace(/section-\d+/gi, "")
-      .replace("Section 1", "")
       .replace("Working links json", "")
       .replace("Working Links JSON", "")
       .replace("JSON", "")
       .replace("json", "")
-      .replace("Textual Answer Explanation", "")
       .replace("Textual Explanation", "")
+      .replace("**Section-2: Relevant Website Links**", "")
+      .replace("Relevant Website Links", "")
+      .replace("**: **", "")
+      .replace("** :**", "")
+
       .replace("Section 2", "")
       .replace("=", "")
       .replace(/[\{\}\[\]•,;]+/g, "")
