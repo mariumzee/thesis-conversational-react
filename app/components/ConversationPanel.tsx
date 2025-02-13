@@ -73,8 +73,6 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
       .replace("JSON", "")
       .replace("json", "")
       .replace("Textual Answer Explanation", "")
-      .replace("*", "")
-      .replace("**", "")
       .replace("Textual Explanation", "")
       .replace("Section 2", "")
       .replace("=", "")
@@ -87,11 +85,14 @@ const ConversationPanel: React.FC<ConversationPanelProps> = ({
   };
 
   const renderText = (text: string) => {
-    const numberedListRegex = /\d+\.\s(.*?)(?=\s\d+\.|$)/g;
-    text = text.replace(numberedListRegex, "").trim();
-    text = cleanText(text);
+    const cleanedText = cleanText(text);
 
-    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>;
+    // Convert numbered list text into proper markdown formatting
+    const formattedText = cleanedText.replace(/(\d+)\.\s+/g, "\n$1. "); // Ensure proper markdown list format
+
+    return (
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{formattedText}</ReactMarkdown>
+    );
   };
 
   useEffect(() => {
