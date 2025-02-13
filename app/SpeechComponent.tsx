@@ -7,8 +7,11 @@ const SpeechComponent: React.FC<{
 }> = ({ onTranscript }) => {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<any | null>(null);
+  const [isClient, setIsClient] = useState(false); // Add this state
 
   useEffect(() => {
+    setIsClient(true); // Set to true once client-side rendering starts
+
     if (typeof window === "undefined") {
       return;
     }
@@ -62,6 +65,10 @@ const SpeechComponent: React.FC<{
       recognition?.start();
     }
   };
+
+  if (!isClient) {
+    return null; // Prevent rendering on the server
+  }
 
   return (
     <Button

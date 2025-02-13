@@ -14,9 +14,10 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import SpeechComponent from "./SpeechComponent";
-import ReactGA from "react-ga";
-import { Helmet } from "react-helmet";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import ReactGA from "react-ga4";
+import { GoogleAnalytics, sendGTMEvent } from "@next/third-parties/google";
+import { GoogleTagManager } from "@next/third-parties/google";
+import Script from "next/script";
 
 const TRACKING_ID_GA = "G-6RB1RCRXHR";
 ReactGA.initialize(TRACKING_ID_GA);
@@ -119,7 +120,17 @@ const Home: React.FC = () => {
 
   return (
     <>
+      <Script id="clarity-script" strategy="afterInteractive">
+        {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "q960wfm5qn");
+          `}
+      </Script>
       <GoogleAnalytics gaId="G-6RB1RCRXHR" />
+      <GoogleTagManager gtmId="GTM-MGRCFL74" />
 
       <div className="flex flex-col h-screen">
         <div className="flex w-full" style={{ height: "90vh" }}>
@@ -134,9 +145,9 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div className="w-full bg-[#2f2f2f] flex justify-center items-center p-4 space-x-4">
-          {/* <SpeechComponent
+          <SpeechComponent
             onTranscript={(transcript) => setInput(transcript)}
-          /> */}
+          />
           <input
             type="text"
             value={input}
@@ -148,6 +159,10 @@ const Home: React.FC = () => {
             disabled={isLoading}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !isLoading) {
+                sendGTMEvent({
+                  event: "Enter Button Pressed",
+                  value: "Search",
+                });
                 e.preventDefault(); // Prevent the default action of the enter key
                 startChat();
               }
