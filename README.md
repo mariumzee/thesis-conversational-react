@@ -1,6 +1,5 @@
 # Conversational Search Interface Evaluation
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 > **A research prototype for evaluating user experience between link-based and AI-powered conversational responses within a unified GPT-based system.**
