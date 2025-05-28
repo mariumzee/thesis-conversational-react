@@ -1,5 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Conversational vs. Traditional Search Evaluation – Research Prototype
 
+This project is a research prototype developed to evaluate user satisfaction and effectiveness in conversational (AI-based) versus traditional (keyword-based) search engines. It allows users to perform side-by-side searches and compare the experience between LINKS and CONVERSATIONS, including the quality of answers and overall satisfaction with each method.
+
+The prototype uses OpenAI's API to power to represent results.
+
+Purpose:
+
+1)  Explore the qualitative and quantitative differences in user experience.
+  
+2)  Measure perceived relevance, accuracy, and usability.
+  
+3)  Support usability testing, A/B testing, or academic research in HCI, NLP, or information retrieval.
+
+Technologies: 
+
+Frontend: React.js + Tailwind CSS, Google tag management
+
+Backend (optional): Node.js / Express, Firebas
+
+AI Engine: OpenAI GPT-4 (via OpenAI API)
+
+
+Deployment (optional): Vercel / Netlify
 ## Getting Started
 
 First, run the development server:
