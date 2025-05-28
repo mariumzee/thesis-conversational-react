@@ -9,7 +9,7 @@
 
 ---
 
-## ✨ Why this project?
+## ✨ About the thesis:
 
 * **Understand search modes** – Explore user experience differences between link suggestion and full-text conversational answers.
 * **Research‑ready** – Designed for usability studies, A/B tests, HCI & IR coursework, or rapid prototyping inside product teams.
