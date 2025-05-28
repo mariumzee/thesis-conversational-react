@@ -71,7 +71,7 @@ The conversational search engine demo is split into two GPT-powered experiences:
 
 ```bash
 # 1 – Install dependencies
-pnpm install         # fastest
+npm install         # fastest
 # or
 yarn install         # or npm install
 
