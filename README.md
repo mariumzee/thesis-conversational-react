@@ -26,7 +26,6 @@
 | **Model A/B Switch**  | Drop in alternative LLMs (Anthropic, Azure OpenAI, local models) by editing one adapter.                              |
 | **Deploy in seconds** | Works out‑of‑the‑box on Vercel/Netlify; no server setup required for basic use.                                       |
 
-> **Screenshot / GIF Placeholder** – Add a `demo.gif` here to showcase the interface.
 
 ---
 
