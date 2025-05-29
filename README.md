@@ -148,9 +148,9 @@ Contributions welcome! See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## 🤝 Contributing
 
-1. Fork the repo & create your branch: `git checkout -b feature/my‑feature`.
+1. Fork the repo & create your branch: `git checkout -b main/[my‑branch-name]`.
 2. Commit changes: `git commit -m "feat: add …"`.
-3. Push to the branch: `git push origin feature/my‑feature`.
+3. Push to the branch: `git push origin main/[my‑branch-name]`.
 4. Open a Pull Request.
 
 Please follow the [Commit Convention](https://www.conventionalcommits.org/) and run `pnpm lint` before pushing.
