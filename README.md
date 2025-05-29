@@ -15,7 +15,6 @@
 * **Single engine, dual modes** – Both panels are powered by GPT‑4, showing its versatility in generating structured (links) and unstructured (conversation) results.
 
 ---
-<img width="930" alt="Screenshot 2025-05-29 at 08 20 30" src="https://github.com/user-attachments/assets/381ba175-9aa9-4642-a342-db93daa61554" />
 
 
 
@@ -66,6 +65,10 @@ The conversational search engine demo is split into two GPT-powered experiences:
 * **Link-Based Assistant (Left Panel):** This panel offers a list of suggested hyperlinks based on the input query. It mirrors the functionality of early AI assistant models or search engine support modules, emphasizing user-led exploration. Each link is curated based on relevance and directs the user to external resources.
 
 * **Conversational Assistant (Right Panel):** This panel uses AI-driven natural language responses to generate a comprehensive, coherent, and contextualized summary based on the user input.
+
+---
+
+<img width="930" alt="Screenshot 2025-05-29 at 08 20 30" src="https://github.com/user-attachments/assets/381ba175-9aa9-4642-a342-db93daa61554" />
 
 ---
 
