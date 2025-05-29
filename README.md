@@ -15,6 +15,10 @@
 * **Single engine, dual modes** – Both panels are powered by GPT‑4, showing its versatility in generating structured (links) and unstructured (conversation) results.
 
 ---
+<img width="946" alt="Screenshot 2025-05-29 at 08 18 42" src="https://github.com/user-attachments/assets/ff689ce0-e9e0-4852-840d-284d42e23df6" />
+
+
+
 
 ## 📐 Key Features
 
